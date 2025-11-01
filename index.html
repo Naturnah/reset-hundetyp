@@ -2,530 +2,343 @@
 <html lang="de">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>RESET – Hundetyp Analyse</title>
-<meta name="description" content="Fragebogen zur automatischen Analyse des Hundetyps (Sanguiniker, Choleriker, Melancholiker, Phlegmatiker) inkl. WhatsApp-Weiterleitung der Ergebnisse." />
-
 <style>
   :root{
-    /* erdige, ruhige Töne */
-    --bg:#f4efe6;
-    --card:#ffffff;
-    --text:#2b2b2b;
-    --muted:#665a4a;
-    --olive:#6c7a64;
-    --sage:#7aa17d;
-    --sand:#ccb898;
-    --line:#e5d7c8;
-    --accent:#a7744c;   /* warm */
-    --focus: rgba(122, 161, 125, .4);
+    --bg:#f4efe6; --card:#ffffff; --text:#2e2b28;
+    --line:#e6dccf; --sand:#cdb79e; --olive:#6f7a62; --brown:#8b6b4e; --accent:#7fa07f;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
   body{
-    margin:0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    background:
-      radial-gradient(1600px 700px at 20% -10%, #efe7db 0%, transparent 60%),
-      radial-gradient(1400px 600px at 120% 120%, #e6e0cf 0%, transparent 60%),
-      var(--bg);
+    margin:0; font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    background:linear-gradient(180deg,#efe8db 0%, #f6f2ea 60%, #f4efe6 100%);
     color:var(--text);
-    line-height:1.5;
   }
-  .wrap{
-    max-width:980px;
-    margin:32px auto 80px;
-    padding:0 16px;
+  .wrap{max-width:960px; margin:28px auto 80px; padding:0 16px;}
+  .panel{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    box-shadow:0 12px 32px rgba(0,0,0,.06); padding:18px 18px;
   }
-  .hero{
-    background:var(--card);
-    border-radius:18px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.08);
-    padding:28px;
-    margin-bottom:22px;
-    border:1px solid var(--line);
-    text-align:center;
+  h1{margin:0 0 4px; font-size:1.6rem; color:var(--brown);}
+  .sub{margin:0 0 14px; color:#6d675f;}
+  .grid{display:grid; gap:14px; grid-template-columns: 1fr 1fr;}
+  @media (max-width: 820px){ .grid{grid-template-columns: 1fr;} }
+  label.top{display:block; font-weight:600; margin:8px 0 6px;}
+  input[type="text"]{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    background:#faf7f2; font-size:15px;
   }
-  h1{
-    margin:0 0 8px;
-    font-weight:800;
-    letter-spacing:.2px;
-  }
-  .sub{
-    color:#5a5a5a;
-    margin:0;
-  }
-  .card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:20px;
-    margin:18px 0;
-  }
-  .qhead{
-    font-weight:700;
-    margin:0 0 10px;
-  }
-  .opt{
-    display:block;
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:12px 14px;
-    margin:10px 0;
-    cursor:pointer;
-    transition: .15s ease;
-    background:#faf8f5;
-  }
-  .opt:hover{ border-color: var(--sage); box-shadow: 0 0 0 3px var(--focus); }
-  input[type="radio"]{ accent-color: var(--sage); transform: translateY(1px); }
-  .row{
-    display:grid; gap:16px;
-    grid-template-columns: 1fr 1fr;
-  }
-  @media (max-width:800px){ .row{ grid-template-columns: 1fr; } }
-
-  .progress{
-    position:sticky; top:0; z-index:5;
-    background:linear-gradient(180deg, rgba(244,239,230,.96), rgba(244,239,230,.75));
-    border-bottom:1px solid var(--line);
-    padding:10px 16px;
-    display:flex; gap:14px; align-items:center;
-    backdrop-filter: blur(6px);
-  }
-  .bar{flex:1; height:8px; background:#eae2d7; border-radius:99px; overflow:hidden}
-  .fill{height:100%; background:linear-gradient(90deg, var(--sage), var(--olive)); width:0%}
-  .pill{font-size:12px; color:#5a5a5a}
-
-  .actions{
-    display:flex; gap:12px; flex-wrap:wrap;
-    margin-top:6px;
-  }
-  button{
-    border:0; cursor:pointer;
-    padding:12px 16px; border-radius:12px;
-    font-weight:700;
-  }
-  .primary{
-    background:var(--sage); color:white;
-    box-shadow: 0 10px 20px rgba(122,161,125,.25);
-  }
-  .ghost{
-    background:#f0ebe3; color:#2b2b2b;
-    border:1px solid var(--line);
-  }
-  .danger{ background:#d66; color:#fff; }
-  .muted{ color:#6b6b6b; font-size:13px }
-  .result-grid{
-    display:grid; gap:10px;
-    grid-template-columns: repeat(4, 1fr);
-    margin-top:12px;
-  }
-  .badge{
-    background:#f8f5f1; border:1px solid var(--line);
-    padding:10px; border-radius:12px; text-align:center;
-  }
-  .percent{ font-weight:800; font-size:18px }
-  .note{
-    font-size:13px; color:#6a6a6a; margin-top:8px
-  }
-
-  .footer{
-    text-align:center; color:#7a7a7a;
-    margin-top:26px; font-size:12px;
-  }
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin:12px 0;}
+  .q{margin:0 0 8px; font-weight:700;}
+  .opt{display:block; padding:9px 10px; margin:8px 0; border:1px solid var(--line); border-radius:10px; background:#fbf9f6;}
+  .opt input{accent-color:var(--accent); margin-right:8px;}
+  .bar{height:8px; background:#ede5d9; border-radius:99px; overflow:hidden; margin:12px 0 2px}
+  .fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--olive));}
+  .muted{color:#7a736b; font-size:13px}
+  .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+  button{border:0; cursor:pointer; padding:12px 16px; border-radius:10px; font-weight:700}
+  .primary{background:var(--olive); color:#fff}
+  .ghost{background:#efe8de; color:#2e2b28; border:1px solid var(--line)}
+  .result{margin-top:14px; display:none}
+  pre{background:#fbf8f3; border:1px solid var(--line); border-radius:10px; padding:12px; overflow:auto}
 </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>RESET – Hundetyp Analyse</h1>
+      <p class="sub">Bitte ausfüllen. Am Ende wird die Auswertung erstellt und <strong>per WhatsApp</strong> an den Trainer gesendet.</p>
 
-<!-- Fortschritt -->
-<div class="progress">
-  <div class="pill">Frage <span id="p-now">0</span> / <span id="p-all">18</span></div>
-  <div class="bar"><div class="fill" id="p-bar"></div></div>
-</div>
+      <!-- Fortschritt -->
+      <div class="bar"><div id="fill" class="fill"></div></div>
+      <div class="muted"><span id="pNow">0</span> / <span id="pAll">20</span> beantwortet</div>
 
-<div class="wrap">
+      <!-- Stammdaten -->
+      <div class="grid">
+        <div>
+          <label class="top" for="dog">Name des Hundes</label>
+          <input id="dog" type="text" placeholder="z. B. Luna" />
+        </div>
+        <div>
+          <label class="top" for="owner">Name des Halters</label>
+          <input id="owner" type="text" placeholder="Vor- und Nachname" />
+        </div>
+      </div>
 
-  <div class="hero">
-    <h1>🐕 RESET – Hundetyp Analyse</h1>
-    <p class="sub">Beantworte alle 18 Fragen ehrlich. Danach erhältst du sofort eine Auswertung (Punkte, Prozent &amp; Top-2-Mix) und kannst sie mit einem Klick per WhatsApp an den Trainer senden.</p>
-  </div>
+      <form id="form">
+        <!-- 18 Fragen – jede Antwort ist einem Typ zugeordnet -->
+        <div class="card">
+          <p class="q">1) Wie verhält sich der Hund an der Leine?</p>
+          <label class="opt"><input type="radio" name="q1" value="SAN"> Zieht hin und her, schnüffelt überall (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q1" value="CHOL"> Zieht geradeaus, sehr fokussiert (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q1" value="MEL"> Bleibt hinten, zögert, weicht aus (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q1" value="PHLE"> Bleibt stehen, schnüffelt lange (Phlegmatiker)</label>
+        </div>
 
-  <!-- FRAGEN -->
-  <form id="quiz" class="row" novalidate>
-    <!-- Jede Frage: data-q="1..18" -->
-    <!-- 1 -->
-    <div class="card" data-q="1">
-      <p class="qhead">1) Wie begrüßt dich dein Hund zu Hause?</p>
-      <label class="opt"><input type="radio" name="q1" value="SAN"> Freudig, lebhaft, springt, will Kontakt (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q1" value="CHOL"> Stürmisch, drängelt, fordert aktiv ein (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q1" value="PHLE"> Ruhig, gelassen, nähert sich ohne Hektik (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q1" value="MEL"> Vorsichtig, beobachtet, braucht Moment (Melancholiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">2) Reaktion auf Reize (Hunde/Fahrräder/Jogger)?</p>
+          <label class="opt"><input type="radio" name="q2" value="SAN"> Springt, bellt, lässt sich leicht ablenken (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q2" value="CHOL"> Fixiert starr, baut Spannung auf (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q2" value="MEL"> Weicht zurück, zeigt Unsicherheit (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q2" value="PHLE"> Bleibt sitzen, reagiert träge (Phlegmatiker)</label>
+        </div>
 
-    <!-- 2 -->
-    <div class="card" data-q="2">
-      <p class="qhead">2) An der Leine draußen: Grundtendenz?</p>
-      <label class="opt"><input type="radio" name="q2" value="SAN"> Zick-zack, neugierig alles ansehen (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q2" value="CHOL"> Zieht stark, will nach vorn / konfrontiert (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q2" value="MEL"> Eher angespannt, scannt, unsicher (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q2" value="PHLE"> Ruhiger Verlauf, passt sich an (Phlegmatiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">3) Nach 1 Stunde Aktivität …</p>
+          <label class="opt"><input type="radio" name="q3" value="SAN"> Will noch mehr, dreht richtig auf (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q3" value="CHOL"> Bleibt fokussiert, macht weiter (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q3" value="MEL"> Wird müde oder unsicherer (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q3" value="PHLE"> Verweigert, will Pause machen (Phlegmatiker)</label>
+        </div>
 
-    <!-- 3 -->
-    <div class="card" data-q="3">
-      <p class="qhead">3) Reaktion auf unbekannte Geräusche im Haus?</p>
-      <label class="opt"><input type="radio" name="q3" value="SAN"> Kurz erschrickt, dann schnell wieder locker (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q3" value="CHOL"> Sofort nach vorn, klären/stellen (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q3" value="MEL"> Rückzug, starkes Beobachten (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q3" value="PHLE"> Nimmt es gelassen hin (Phlegmatiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">4) Beim Stoppen oder Zurückhalten …</p>
+          <label class="opt"><input type="radio" name="q4" value="SAN"> Zappelt, will sofort weiter (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q4" value="CHOL"> Versteift sich, stemmt dagegen (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q4" value="MEL"> Duckt sich, erstarrt (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q4" value="PHLE"> Bleibt stehen, reagiert kaum (Phlegmatiker)</label>
+        </div>
 
-    <!-- 4 -->
-    <div class="card" data-q="4">
-      <p class="qhead">4) Spielaufforderung mit dir?</p>
-      <label class="opt"><input type="radio" name="q4" value="SAN"> Verspielt, wechselt schnell (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q4" value="CHOL"> Sehr fordernd, will gewinnen (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q4" value="PHLE"> Spielt ruhig, dosiert (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q4" value="MEL"> Zögerlich, vorsichtig (Melancholiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">5) Beruhigung nach Aufregung?</p>
+          <label class="opt"><input type="radio" name="q5" value="SAN"> Schnell hoch, schnell runter (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q5" value="CHOL"> Bleibt lange aufgeregt (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q5" value="MEL"> Nur bei Sicherheit aktiv (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q5" value="PHLE"> Dreht selten auf (Phlegmatiker)</label>
+        </div>
 
-    <!-- 5 -->
-    <div class="card" data-q="5">
-      <p class="qhead">5) Begegnung mit Hunden auf Distanz?</p>
-      <label class="opt"><input type="radio" name="q5" value="SAN"> Fröhlich, möchte hin (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q5" value="CHOL"> Fixiert, baut Spannung auf (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q5" value="MEL"> Unsicher, meidet Blick, weicht aus (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q5" value="PHLE"> Beobachtet neutral, bleibt ruhig (Phlegmatiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">6) Ruhe zu Hause?</p>
+          <label class="opt"><input type="radio" name="q6" value="SAN"> Wechselt ständig den Platz (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q6" value="CHOL"> Liegt mit Blick auf alles (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q6" value="MEL"> Sucht ruhige Ecken (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q6" value="PHLE"> Fester Platz, sehr ruhig (Phlegmatiker)</label>
+        </div>
 
-    <!-- 6 -->
-    <div class="card" data-q="6">
-      <p class="qhead">6) Ruheverhalten zuhause?</p>
-      <label class="opt"><input type="radio" name="q6" value="PHLE"> Viel liegend, gut abschaltbar (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q6" value="SAN"> Häufiges Aufstehen, schauen, „FOMO“ (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q6" value="MEL"> Liegt, aber wachsam & schnell alarmiert (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q6" value="CHOL"> Unruhig, patrouilliert, kontrolliert (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">7) In neuer Umgebung?</p>
+          <label class="opt"><input type="radio" name="q7" value="SAN"> Muss alles erkunden, überdreht (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q7" value="CHOL"> Markiert, kontrolliert (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q7" value="MEL"> Bleibt nah bei mir, vorsichtig (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q7" value="PHLE"> Bleibt stehen, schnüffelt (Phlegmatiker)</label>
+        </div>
 
-    <!-- 7 -->
-    <div class="card" data-q="7">
-      <p class="qhead">7) Futter-/Ressourcen-Nähe (du gehst zu Futter/Spielzeug)?</p>
-      <label class="opt"><input type="radio" name="q7" value="PHLE"> Gibt problemlos ab (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q7" value="SAN"> Frisst schneller, nimmt weg (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q7" value="CHOL"> Versteift sich, knurrt (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q7" value="CHOL"> Schnappt, beißt (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">8) Reaktion auf deine Körpersprache?</p>
+          <label class="opt"><input type="radio" name="q8" value="SAN"> Reagiert spät oder gar nicht (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q8" value="CHOL"> Testet mich, beobachtet genau (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q8" value="MEL"> Zieht sich bei Spannung zurück (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q8" value="PHLE"> Reagiert kaum (Phlegmatiker)</label>
+        </div>
 
-    <!-- 8 -->
-    <div class="card" data-q="8">
-      <p class="qhead">8) Reaktion auf klare Grenzen/„Nein“?</p>
-      <label class="opt"><input type="radio" name="q8" value="SAN"> Kurze Diskussion, dann okay (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q8" value="CHOL"> Gegenwehr, drückt nach (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q8" value="PHLE"> Nimmt es an, bleibt ruhig (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q8" value="MEL"> Wird unsicher/hektisch (Melancholiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">9) Wenn du dich Futter oder Spielzeug näherst?</p>
+          <label class="opt"><input type="radio" name="q9" value="PHLE"> Gibt problemlos ab (Phlegmatiker)</label>
+          <label class="opt"><input type="radio" name="q9" value="SAN"> Frisst schneller, nimmt weg (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q9" value="CHOL"> Versteift sich, knurrt (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q9" value="CHOL"> Schnappt, beißt (Choleriker)</label>
+        </div>
 
-    <!-- 9 -->
-    <div class="card" data-q="9">
-      <p class="qhead">9) Neues Umfeld (z. B. Markt, Bahnhof)?</p>
-      <label class="opt"><input type="radio" name="q9" value="SAN"> Neugierig, überall gucken (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q9" value="MEL"> Stressanzeichen, meidet, klebt (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q9" value="CHOL"> Hochgefahren, stellt sich breit (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q9" value="PHLE"> Ruhig, folgt dir, wenig Thema (Phlegmatiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">10) Reaktion auf fremde Menschen?</p>
+          <label class="opt"><input type="radio" name="q10" value="SAN"> Freundlich zu allen (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q10" value="PHLE"> Ignoriert Fremde (Phlegmatiker)</label>
+          <label class="opt"><input type="radio" name="q10" value="MEL"> Unsicher, weicht aus (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q10" value="CHOL"> Knurrt oder bellt (Choleriker)</label>
+        </div>
 
-    <!-- 10 -->
-    <div class="card" data-q="10">
-      <p class="qhead">10) Alleinbleiben kurz (z. B. 15 Min)?</p>
-      <label class="opt"><input type="radio" name="q10" value="PHLE"> Legt sich hin, ok (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q10" value="SAN"> Etwas Trubel, dann ok (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q10" value="MEL"> Jaulen/Hecheln, aufgescheucht (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q10" value="CHOL"> Kontrolliert, bellt, hält Stellung (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">11) Reaktion auf andere Hunde?</p>
+          <label class="opt"><input type="radio" name="q11" value="SAN"> Spielt gern und fair (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q11" value="PHLE"> Ignoriert andere Hunde (Phlegmatiker)</label>
+          <label class="opt"><input type="radio" name="q11" value="MEL"> Unsicher, meidet Kontakt (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q11" value="CHOL"> Pöbelt an der Leine (Choleriker)</label>
+        </div>
 
-    <!-- 11 -->
-    <div class="card" data-q="11">
-      <p class="qhead">11) Handling/Körperkontakt?</p>
-      <label class="opt"><input type="radio" name="q11" value="SAN"> Genießt schnell, sucht Nähe (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q11" value="PHLE"> Lässt ruhig zu, entspannt (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q11" value="MEL"> Zögerlich, braucht ruhige Führung (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q11" value="CHOL"> Duldung nur begrenzt, bestimmt (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">12) Wenn er etwas nicht bekommt oder darf?</p>
+          <label class="opt"><input type="radio" name="q12" value="PHLE"> Akzeptiert es schnell (Phlegmatiker)</label>
+          <label class="opt"><input type="radio" name="q12" value="SAN"> Wird kurz unruhig, gibt auf (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q12" value="MEL"> Bellt, jault, wird hektisch (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q12" value="CHOL"> Wird aggressiv, zerstört (Choleriker)</label>
+        </div>
 
-    <!-- 12 -->
-    <div class="card" data-q="12">
-      <p class="qhead">12) Impulskontrolle beim Futter?</p>
-      <label class="opt"><input type="radio" name="q12" value="PHLE"> Wartet gut, bleibt ruhig (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q12" value="SAN"> Schwer warten, hibbelig (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q12" value="CHOL"> Drängt massiv vor, setzt sich durch (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q12" value="MEL"> Unsicher, angespannt, klebt an dir (Melancholiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">13) Kann dein Hund warten?</p>
+          <label class="opt"><input type="radio" name="q13" value="PHLE"> Ja, gut (Phlegmatiker)</label>
+          <label class="opt"><input type="radio" name="q13" value="SAN"> Mit Mühe, braucht Hilfe (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q13" value="MEL"> Nur kurz, wird hektisch (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q13" value="CHOL"> Nein, drängt aggressiv (Choleriker)</label>
+        </div>
 
-    <!-- 13 -->
-    <div class="card" data-q="13">
-      <p class="qhead">13) Wenn du dich Futter/Spielzeug näherst (zusammengeführt):</p>
-      <label class="opt"><input type="radio" name="q13" value="PHLE"> Gibt problemlos ab (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q13" value="SAN"> Frisst schneller, nimmt weg (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q13" value="CHOL"> Versteift/knurrt (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q13" value="CHOL"> Schnappt/beißen (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">14) Stressanzeichen deines Hundes?</p>
+          <label class="opt"><input type="radio" name="q14" value="SAN"> Hecheln, Gähnen (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q14" value="CHOL"> Unruhe, Umherlaufen (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q14" value="MEL"> Stereotypien (Kreisen, Schwanzjagen) (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q14" value="PHLE"> Seltenes Aufdrehen, ruhig (Phlegmatiker)</label>
+        </div>
 
-    <!-- 14 -->
-    <div class="card" data-q="14">
-      <p class="qhead">14) Training: Reaktion auf klare Struktur/Regeln?</p>
-      <label class="opt"><input type="radio" name="q14" value="PHLE"> Nimmt ruhig an, macht mit (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q14" value="SAN"> Braucht Abwechslung/Motivation (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q14" value="MEL"> Sicherheit durch Vorzeigen/Tempo runter (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q14" value="CHOL"> Testet Grenzen, braucht konsequente Führung (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">15) Rückruf / Orientierung draußen:</p>
+          <label class="opt"><input type="radio" name="q15" value="SAN"> Kommt fröhlich, aber mit Umwegen (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q15" value="CHOL"> Kommt schnell & direkt (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q15" value="MEL"> Kommt nur vorsichtig/unsicher (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q15" value="PHLE"> Braucht lange / bleibt stehen (Phlegmatiker)</label>
+        </div>
 
-    <!-- 15 -->
-    <div class="card" data-q="15">
-      <p class="qhead">15) Stresszeichen im Alltag, die du am häufigsten siehst?</p>
-      <label class="opt"><input type="radio" name="q15" value="SAN"> Hecheln, Gähnen (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q15" value="CHOL"> Unruhe, Umherlaufen (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q15" value="MEL"> Stereotypien (Schwanzjagen/Kreisen) (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q15" value="MEL"> Selbstverletzung (Melancholiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">16) Impulskontrolle an der Tür / bei Futter:</p>
+          <label class="opt"><input type="radio" name="q16" value="SAN"> Kaum wartbar, springt vor (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q16" value="CHOL"> Spannt an, drängt nach vorn (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q16" value="MEL"> Zögert, wartet unsicher (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q16" value="PHLE"> Wartet ruhig (Phlegmatiker)</label>
+        </div>
 
-    <!-- 16 -->
-    <div class="card" data-q="16">
-      <p class="qhead">16) Wenn er etwas nicht bekommt oder darf?</p>
-      <label class="opt"><input type="radio" name="q16" value="PHLE"> Akzeptiert es schnell (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q16" value="SAN"> Wird kurz unruhig, gibt auf (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q16" value="MEL"> Bellt/jaulte/hektisch (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q16" value="CHOL"> Wird aggressiv/zerstört (Choleriker)</label>
-    </div>
+        <div class="card">
+          <p class="q">17) Handling / Pflege (Bürsten, Pfoten, Maulkorb):</p>
+          <label class="opt"><input type="radio" name="q17" value="SAN"> Zappelig, aber freundlich (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q17" value="CHOL"> Wehrt sich deutlich (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q17" value="MEL"> Lässt es ängstlich über sich ergehen (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q17" value="PHLE"> Gelassen, unproblematisch (Phlegmatiker)</label>
+        </div>
 
-    <!-- 17 -->
-    <div class="card" data-q="17">
-      <p class="qhead">17) Orientierung draußen an dir?</p>
-      <label class="opt"><input type="radio" name="q17" value="PHLE"> Bleibt in deiner Nähe, gute Leinenführigkeit (Phlegmatiker)</label>
-      <label class="opt"><input type="radio" name="q17" value="SAN"> Schwankt – mal top, mal abgelenkt (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q17" value="CHOL"> Drückt nach vorn, übernimmt (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q17" value="MEL"> Sucht Schutz/zu dir bei Reizen (Melancholiker)</label>
-    </div>
+        <div class="card">
+          <p class="q">18) Alleinbleiben / Trennungsphasen:</p>
+          <label class="opt"><input type="radio" name="q18" value="SAN"> Sucht Beschäftigung, läuft umher (Sanguiniker)</label>
+          <label class="opt"><input type="radio" name="q18" value="CHOL"> Protestiert lautstark (Choleriker)</label>
+          <label class="opt"><input type="radio" name="q18" value="MEL"> Jault / zeigt Unsicherheit (Melancholiker)</label>
+          <label class="opt"><input type="radio" name="q18" value="PHLE"> Schläft, bleibt ruhig (Phlegmatiker)</label>
+        </div>
+      </form>
 
-    <!-- 18 -->
-    <div class="card" data-q="18">
-      <p class="qhead">18) Begegnung nah (2–3 m):</p>
-      <label class="opt"><input type="radio" name="q18" value="SAN"> Spielsignale/aufgeregt (Sanguiniker)</label>
-      <label class="opt"><input type="radio" name="q18" value="CHOL"> Stellt sich, zeigt sich groß (Choleriker)</label>
-      <label class="opt"><input type="radio" name="q18" value="MEL"> Meidet, dreht ab, klebt an dir (Melancholiker)</label>
-      <label class="opt"><input type="radio" name="q18" value="PHLE"> Neutral, geht weiter (Phlegmatiker)</label>
-    </div>
-  </form>
+      <div class="actions">
+        <button id="send" class="primary" type="button">Auswertung anzeigen & per WhatsApp senden</button>
+        <button id="copy" class="ghost" type="button">Nur Ergebnis kopieren</button>
+      </div>
 
-  <!-- Aktion -->
-  <div class="actions">
-    <button id="btn-calc" class="primary">Auswertung berechnen</button>
-    <button id="btn-reset" class="ghost" type="button">Antworten löschen</button>
-    <button id="btn-save"  class="ghost" type="button">Antworten lokal speichern</button>
-    <span class="muted">Keine Datenübertragung – alles läuft im Browser.</span>
-  </div>
+      <div id="out" class="result">
+        <h3>Auswertung (Vorschau)</h3>
+        <pre id="preview"></pre>
+      </div>
 
-  <!-- Ergebnis -->
-  <div id="result" class="card" style="display:none">
-    <h3 style="margin-top:6px">Ergebnis</h3>
-    <div id="r-summary"></div>
-    <div class="result-grid" id="r-grid"></div>
-
-    <div class="note">
-      Die Prozentwerte basieren auf 18 Antworten (1 Punkt pro Antwort).
-      Bei Gleichstand entsteht ein **Mischtyp** aus den beiden höchsten Anteilen.
-    </div>
-
-    <div class="actions" style="margin-top:14px">
-      <button id="btn-wa" class="primary" type="button">Per WhatsApp an Trainer senden</button>
-      <button id="btn-copy" class="ghost" type="button">Ergebnis in Zwischenablage kopieren</button>
+      <p class="muted">Hinweis: Es werden keine Daten gespeichert – alles läuft lokal im Browser des Nutzers.</p>
     </div>
   </div>
-
-  <div class="footer">
-    © RESET Hundetyp Analyse – lokal im Browser · Du kannst diese Seite als GitHub Page hosten.  
-  </div>
-
-</div>
 
 <script>
 (function(){
-  const FORM = document.getElementById('quiz');
-  const TOTAL = 18;
-  document.getElementById('p-all').textContent = TOTAL;
+  const WA_NUMBER = "15781556678"; // ohne + und ohne Leerzeichen
 
-  const phoneInternational = '4915781556678'; // Ziel-Nummer ohne + und ohne führende 0
-  const storeKey = 'reset-hundetyp-answers-v1';
+  const TOTAL_FIELDS = 20; // 2 Stammdaten + 18 Fragen
+  const pNow = document.getElementById('pNow');
+  const pAll = document.getElementById('pAll');
+  const fill = document.getElementById('fill');
+  pAll.textContent = TOTAL_FIELDS;
 
-  // Fortschritt
-  function progress(){
-    const filled = new FormData(FORM);
-    let count = 0;
-    for(let i=1;i<=TOTAL;i++){
-      if(filled.get('q'+i)) count++;
+  const form = document.getElementById('form');
+  const dog = document.getElementById('dog');
+  const owner = document.getElementById('owner');
+  const out = document.getElementById('out');
+  const preview = document.getElementById('preview');
+
+  function countProgress(){
+    let done = 0;
+    if(dog.value.trim()) done++;
+    if(owner.value.trim()) done++;
+    for(let i=1;i<=18;i++){
+      if(form.querySelector('input[name="q'+i+'"]:checked')) done++;
     }
-    document.getElementById('p-now').textContent = count;
-    document.getElementById('p-bar').style.width = (count/TOTAL*100)+'%';
-  }
-  FORM.addEventListener('change', progress);
-  progress();
-
-  // Antworten speichern / laden
-  document.getElementById('btn-save').addEventListener('click', ()=>{
-    const data = {};
-    for(let i=1;i<=TOTAL;i++){
-      const v = new FormData(FORM).get('q'+i) || '';
-      data['q'+i] = v;
-    }
-    localStorage.setItem(storeKey, JSON.stringify(data));
-    alert('Antworten lokal gespeichert.');
-  });
-
-  const saved = localStorage.getItem(storeKey);
-  if(saved){
-    try{
-      const data = JSON.parse(saved);
-      for(let i=1;i<=TOTAL;i++){
-        const v = data['q'+i];
-        if(v){
-          const radio = FORM.querySelector('input[name="q'+i+'"][value="'+v+'"]');
-          if(radio){ radio.checked = true; }
-        }
-      }
-      progress();
-    }catch(e){}
+    pNow.textContent = done;
+    fill.style.width = (done / TOTAL_FIELDS * 100) + '%';
   }
 
-  document.getElementById('btn-reset').addEventListener('click', ()=>{
-    if(confirm('Alle Antworten löschen?')){
-      FORM.reset();
-      localStorage.removeItem(storeKey);
-      document.getElementById('result').style.display='none';
-      progress();
-      window.scrollTo({top:0, behavior:'smooth'});
-    }
-  });
+  document.addEventListener('input', countProgress);
+  countProgress();
 
-  // Scoring
-  function calc(){
-    const fd = new FormData(FORM);
-    // Pflichtprüfung
-    let missing = [];
-    for(let i=1;i<=TOTAL;i++){
-      if(!fd.get('q'+i)) missing.push(i);
+  function getAnswerText(qName){
+    const el = form.querySelector('input[name="'+qName+'"]:checked');
+    if(!el) return "";
+    // den sichtbaren Text der Labelzeile zurückgeben
+    return el.parentElement.textContent.trim();
+  }
+
+  function typFromValue(val){
+    if(val==="SAN") return "Sanguiniker";
+    if(val==="CHOL") return "Choleriker";
+    if(val==="MEL") return "Melancholiker";
+    if(val==="PHLE") return "Phlegmatiker";
+    return "";
+  }
+
+  function buildReport(){
+    // Validierung
+    const missing = [];
+    if(!dog.value.trim()) missing.push("Name des Hundes");
+    if(!owner.value.trim()) missing.push("Name des Halters");
+    for(let i=1;i<=18;i++){
+      if(!form.querySelector('input[name="q'+i+'"]:checked')) missing.push("Frage "+i);
     }
     if(missing.length){
-      alert('Bitte beantworte alle Fragen. Es fehlen: '+missing.join(', '));
-      const el = FORM.querySelector('[data-q="'+missing[0]+'"]');
-      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      alert("Bitte alles ausfüllen:\n• " + missing.join("\n• "));
       return null;
     }
 
-    const score = { SAN:0, CHOL:0, MEL:0, PHLE:0 };
-    for(let i=1;i<=TOTAL;i++){
-      const v = fd.get('q'+i);
-      if(score[v]!==undefined) score[v]++;
-    }
-    const pct = {};
-    Object.keys(score).forEach(k=>{
-      pct[k] = Math.round(score[k]/TOTAL*100);
-    });
-
-    // Sortieren
-    const ranking = Object.entries(score)
-      .map(([k,v])=>({typ:k, punkte:v, prozent:pct[k]}))
-      .sort((a,b)=> b.punkte - a.punkte);
-
-    // Mischtyp (Top2)
-    let mix = ranking[0].typ;
-    if(ranking.length>1 && ranking[1].punkte===ranking[0].punkte || ranking[1].punkte>0){
-      mix = ranking[0].typ + ' + ' + ranking[1].typ;
+    // Zählung
+    const counts = { Sanguiniker:0, Choleriker:0, Melancholiker:0, Phlegmatiker:0 };
+    for(let i=1;i<=18;i++){
+      const rb = form.querySelector('input[name="q'+i+'"]:checked');
+      if(rb){ counts[typFromValue(rb.value)]++; }
     }
 
-    return {score, pct, ranking, mix};
-  }
-
-  function labelOf(code){
-    return ({
-      SAN:'Sanguiniker',
-      CHOL:'Choleriker',
-      MEL:'Melancholiker',
-      PHLE:'Phlegmatiker'
-    })[code] || code;
-  }
-
-  function render(res){
-    if(!res) return;
-    const r = document.getElementById('result');
-    const sum = document.getElementById('r-summary');
-    const grid = document.getElementById('r-grid');
-
-    const top = res.ranking[0];
-    const second = res.ranking[1];
-
-    const mixNice = res.mix.replace('SAN','Sanguiniker').replace('CHOL','Choleriker').replace('MEL','Melancholiker').replace('PHLE','Phlegmatiker');
-
-    sum.innerHTML = `
-      <p><strong>Top-Typ:</strong> ${labelOf(top.typ)} (${top.punkte} Punkte, ${top.prozent} %)</p>
-      <p><strong>Mischtyp (Top-2):</strong> ${mixNice}${ second ? ` (Anteil: ${top.prozent}% / ${second.prozent}% )` : ''}</p>
-      <p class="muted">Rohpunkte: SAN ${res.score.SAN} · CHOL ${res.score.CHOL} · MEL ${res.score.MEL} · PHLE ${res.score.PHLE}</p>
-    `;
-
-    grid.innerHTML = '';
-    ['SAN','CHOL','MEL','PHLE'].forEach(code=>{
-      const el = document.createElement('div');
-      el.className = 'badge';
-      el.innerHTML = `<div>${labelOf(code)}</div><div class="percent">${res.pct[code]} %</div><div class="muted">${res.score[code]} / ${TOTAL} Punkte</div>`;
-      grid.appendChild(el);
-    });
-
-    r.style.display = 'block';
-    r.scrollIntoView({behavior:'smooth', block:'start'});
-
-    // WhatsApp & Copy
-    const waText = buildText(res);
-    document.getElementById('btn-wa').onclick = ()=>{
-      const url = 'https://wa.me/'+phoneInternational+'?text='+encodeURIComponent(waText);
-      window.open(url, '_blank');
-    };
-    document.getElementById('btn-copy').onclick = async ()=>{
-      try{
-        await navigator.clipboard.writeText(waText);
-        alert('Ergebnis wurde in die Zwischenablage kopiert.');
-      }catch(e){
-        alert('Kopieren nicht möglich.'); 
-      }
-    };
-  }
-
-  function buildText(res){
+    // Vollständiger Fragebogen-Text
     const lines = [];
-    lines.push('RESET Hundetyp – Auswertung');
-    lines.push('—');
-    lines.push(`SAN (Sanguiniker): ${res.score.SAN} / ${TOTAL} (${res.pct.SAN}%)`);
-    lines.push(`CHOL (Choleriker): ${res.score.CHOL} / ${TOTAL} (${res.pct.CHOL}%)`);
-    lines.push(`MEL (Melancholiker): ${res.score.MEL} / ${TOTAL} (${res.pct.MEL}%)`);
-    lines.push(`PHLE (Phlegmatiker): ${res.score.PHLE} / ${TOTAL} (${res.pct.PHLE}%)`);
-    lines.push('—');
+    lines.push("🐕 RESET Hundetyp – Fragebogen");
+    lines.push("");
+    lines.push("Hund: " + dog.value.trim());
+    lines.push("Halter: " + owner.value.trim());
+    lines.push("");
+    lines.push("Antworten:");
+    for(let i=1;i<=18;i++){
+      lines.push(i.toString().padStart(2,"0") + ") " + getAnswerText("q"+i));
+    }
+    lines.push("");
+    lines.push("Auswertung (Zählung):");
+    lines.push("Choleriker: " + counts["Choleriker"]);
+    lines.push("Phlegmatiker: " + counts["Phlegmatiker"]);
+    lines.push("Sanguiniker: " + counts["Sanguiniker"]);
+    lines.push("Melancholiker: " + counts["Melancholiker"]);
 
-    const top = res.ranking[0];
-    const second = res.ranking[1];
-    const mixNice = res.mix.replace('SAN','Sanguiniker').replace('CHOL','Choleriker').replace('MEL','Melancholiker').replace('PHLE','Phlegmatiker');
-    lines.push(`Top-Typ: ${labelOf(top.typ)} (${top.prozent}%)`);
-    if(second){ lines.push(`Zweit-Typ: ${labelOf(second.typ)} (${second.prozent}%)`); }
-    lines.push(`Mischtyp (Top-2): ${mixNice}`);
-    lines.push('—');
-    lines.push('Hinweis: Automatisch generiert aus 18 Antworten. Keine Server-Speicherung.');
-    return lines.join('\n');
+    return { text: lines.join("\n"), counts };
   }
 
-  document.getElementById('btn-calc').addEventListener('click', (e)=>{
-    e.preventDefault();
-    const res = calc();
-    render(res);
+  document.getElementById('copy').addEventListener('click', async ()=>{
+    const res = buildReport();
+    if(!res) return;
+    try{
+      await navigator.clipboard.writeText(res.text);
+      alert("Ergebnis wurde in die Zwischenablage kopiert.");
+      out.style.display = "block";
+      preview.textContent = res.text;
+    }catch(e){
+      out.style.display = "block";
+      preview.textContent = res.text + "\n\n(Kopieren nicht möglich – bitte manuell markieren.)";
+    }
   });
 
+  document.getElementById('send').addEventListener('click', ()=>{
+    const res = buildReport();
+    if(!res) return;
+    // Vorschau zeigen
+    out.style.display = "block";
+    preview.textContent = res.text;
+
+    // WhatsApp öffnen
+    const url = "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(res.text);
+    window.open(url, "_blank");
+  });
 })();
 </script>
-
 </body>
 </html>
