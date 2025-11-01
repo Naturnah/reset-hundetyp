@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RESET – Hundetyp Fragebogen</title>
+<style>
+:root{
+  --bg:#f4efe6; --card:#fff; --text:#363636;
+  --accent:#a7744c; --accent2:#d6b48a; --sand:#cbb898;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  background:radial-gradient(circle at 30% 20%,var(--bg),var(--sand));
+  color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.container{width:100%; max-width:900px; background:var(--card); border-radius:18px; box-shadow:0 18px 48px rgba(0,0,0,.15); overflow:hidden}
+header{background:var(--accent); color:#fff; padding:26px 24px; text-align:center}
+h1{margin:0; font-size:1.8rem}
+p.lead{margin:.5rem 0 0}
+.progress{height:6px; background:#e9e3d8}
+.progress>div{height:100%; width:0%; background:var(--accent2); transition:width .25s}
+.section{display:none; padding:26px}
+.section.active{display:block; animation:fade .25s ease}
+@keyframes fade{from{opacity:.0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{margin:0 0 12px}
+.meta{opacity:.7; font-weight:700; margin-bottom:6px}
+.option{
+  background:#faf9f6; padding:14px 16px; border-radius:12px; border:2px solid transparent;
+  cursor:pointer; margin:10px 0; transition:.15s
+}
+.option:hover{background:#f5efe6; border-color:#e6d5bd}
+.option.selected{background:var(--accent); color:#fff; border-color:var(--accent)}
+.actions{display:flex; justify-content:space-between; gap:12px; margin-top:18px}
+.btn{border:none; border-radius:10px; padding:12px 20px; font-weight:700; cursor:pointer}
+.btn.back{background:#eee5d4}
+.btn.next{background:var(--accent); color:#fff}
+.result{display:none; padding:28px; text-align:center}
+.result pre{background:#faf9f6; border-radius:12px; padding:16px; text-align:left; overflow:auto}
+.wa{margin-top:12px; background:#25d366; color:#fff}
+.small{opacity:.7; font-size:.9rem; margin-top:8px}
+.start-btn{margin-top:14px; background:#c28a5e; color:#fff; border:none; border-radius:10px; padding:12px 22px; font-weight:700; cursor:pointer}
+.start-btn:hover{background:#b2794e}
+</style>
+</head>
+<body>
+<div class="container">
+  <header id="intro">
+    <h1>🐕 RESET Hundetyp Fragebogen</h1>
+    <p class="lead">Beantworte alle 18 Fragen. Am Ende öffnet sich WhatsApp automatisch mit der Auswertung (nur Zahlen).</p>
+    <button class="start-btn" onclick="start()">Los geht’s</button>
+  </header>
+
+  <div class="progress"><div id="bar"></div></div>
+
+  <div id="qwrap"></div>
+
+  <div class="result" id="result">
+    <h2>Auswertung</h2>
+    <pre id="report"></pre>
+    <button class="btn wa" onclick="openWA()">📲 Ergebnis per WhatsApp senden</button>
+    <div class="small">Falls sich WhatsApp nicht automatisch geöffnet hat, tippe hier.</div>
+  </div>
+</div>
+
+<script>
+/* ---------- 18 Fragen (jede Option enthält den Typ in Klammern) ---------- */
+const QUESTIONS = [
+ {q:"Wie verhält sich dein Hund an der Leine?",
+  o:["Zieht hin und her, schnüffelt überall (Sanguiniker)",
+     "Zieht geradeaus, sehr fokussiert (Choleriker)",
+     "Bleibt hinten, zögert, weicht aus (Melancholiker)",
+     "Bleibt stehen, schnüffelt lange (Phlegmatiker)"]},
+ {q:"Wie reagiert er auf Reize (z. B. Hunde, Fahrräder)?",
+  o:["Springt, bellt, lässt sich leicht ablenken (Sanguiniker)",
+     "Fixiert starr, baut Spannung auf (Choleriker)",
+     "Weicht zurück, zeigt Unsicherheit (Melancholiker)",
+     "Bleibt sitzen, reagiert träge (Phlegmatiker)"]},
+ {q:"Nach einer Stunde Aktivität …",
+  o:["Will noch mehr, dreht auf (Sanguiniker)",
+     "Bleibt fokussiert, macht weiter (Choleriker)",
+     "Wird müde oder unsicherer (Melancholiker)",
+     "Verweigert, will Pause machen (Phlegmatiker)"]},
+ {q:"Beim Stoppen oder Zurückhalten …",
+  o:["Zappelt, will sofort weiter (Sanguiniker)",
+     "Versteift sich, stemmt dagegen (Choleriker)",
+     "Duckt sich, erstarrt (Melancholiker)",
+     "Bleibt stehen, reagiert kaum (Phlegmatiker)"]},
+ {q:"Wie schnell beruhigt er sich nach Aufregung?",
+  o:["Schnell hoch, schnell runter (Sanguiniker)",
+     "Bleibt lange aufgeregt (Choleriker)",
+     "Nur bei Sicherheit aktiv (Melancholiker)",
+     "Dreht selten auf (Phlegmatiker)"]},
+ {q:"Ruhe zu Hause:",
+  o:["Wechselt ständig den Platz (Sanguiniker)",
+     "Liegt mit Blick auf alles (Choleriker)",
+     "Sucht ruhige Ecken (Melancholiker)",
+     "Fester Platz, sehr ruhig (Phlegmatiker)"]},
+ {q:"In neuer Umgebung …",
+  o:["Muss alles erkunden, überdreht (Sanguiniker)",
+     "Markiert, kontrolliert (Choleriker)",
+     "Bleibt nah bei mir, vorsichtig (Melancholiker)",
+     "Bleibt stehen, schnüffelt (Phlegmatiker)"]},
+ {q:"Reaktion auf deine Körpersprache?",
+  o:["Reagiert spät oder gar nicht (Sanguiniker)",
+     "Testet mich, beobachtet genau (Choleriker)",
+     "Zieht sich bei Spannung zurück (Melancholiker)",
+     "Reagiert kaum (Phlegmatiker)"]},
+ {q:"Wenn du dich Futter oder Spielzeug näherst?",
+  o:["Gibt problemlos ab (Phlegmatiker)",
+     "Frisst schneller, nimmt weg (Sanguiniker)",
+     "Versteift sich, knurrt (Choleriker)",
+     "Schnappt, beißt (Melancholiker)"]},
+ {q:"Wie reagiert er auf fremde Menschen?",
+  o:["Freundlich zu allen (Sanguiniker)",
+     "Ignoriert Fremde (Phlegmatiker)",
+     "Unsicher, weicht aus (Melancholiker)",
+     "Knurrt, bellt (Choleriker)"]},
+ {q:"Wie reagiert er auf andere Hunde?",
+  o:["Spielt gern und fair (Sanguiniker)",
+     "Ignoriert andere Hunde (Phlegmatiker)",
+     "Unsicher, meidet Kontakt (Melancholiker)",
+     "Pöbelt an der Leine (Choleriker)"]},
+ {q:"Wenn er etwas nicht bekommt oder darf?",
+  o:["Akzeptiert es schnell (Phlegmatiker)",
+     "Wird kurz unruhig, gibt auf (Sanguiniker)",
+     "Bellt, jault, wird hektisch (Melancholiker)",
+     "Wird aggressiv, zerstört (Choleriker)"]},
+ {q:"Kann dein Hund warten?",
+  o:["Ja, gut (Phlegmatiker)",
+     "Mit Mühe, braucht Hilfe (Sanguiniker)",
+     "Nur kurz, wird hektisch (Melancholiker)",
+     "Nein, drängt aggressiv (Choleriker)"]},
+ {q:"Welche Stressanzeichen zeigt dein Hund?",
+  o:["Hecheln, Gähnen (Sanguiniker)",
+     "Unruhe, Umherlaufen (Choleriker)",
+     "Stereotypien (Schwanzjagen etc.) (Melancholiker)",
+     "Selbstverletzung (Phlegmatiker)"]},
+ {q:"Rückruf / Orientierung draußen:",
+  o:["Kommt fröhlich, aber mit Umwegen (Sanguiniker)",
+     "Kommt schnell & direkt (Choleriker)",
+     "Kommt nur vorsichtig/unsicher (Melancholiker)",
+     "Braucht lange / bleibt stehen (Phlegmatiker)"]},
+ {q:"Impulskontrolle an der Tür / bei Futter:",
+  o:["Kaum wartbar, springt vor (Sanguiniker)",
+     "Spannt an, drängt nach vorn (Choleriker)",
+     "Zögert, wartet unsicher (Melancholiker)",
+     "Wartet ruhig (Phlegmatiker)"]},
+ {q:"Handling / Körperpflege (Bürsten, Pfoten, Maulkorb):",
+  o:["Zappelig, aber freundlich (Sanguiniker)",
+     "Wehrt sich deutlich (Choleriker)",
+     "Lässt es ängstlich über sich ergehen (Melancholiker)",
+     "Gelassen, unproblematisch (Phlegmatiker)"]},
+ {q:"Alleinbleiben / Trennungsphasen:",
+  o:["Sucht Beschäftigung, läuft umher (Sanguiniker)",
+     "Protestiert lautstark (Choleriker)",
+     "Jault / zeigt Unsicherheit (Melancholiker)",
+     "Schläft, bleibt ruhig (Phlegmatiker)"]}
+];
+
+/* ----------- Logik ----------- */
+let idx = -1;
+const counts = {Sanguiniker:0, Choleriker:0, Melancholiker:0, Phlegmatiker:0};
+const qwrap = document.getElementById('qwrap');
+const bar = document.getElementById('bar');
+
+function start(){
+  document.getElementById('intro').style.display='none';
+  next();
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[idx];
+  const section = document.createElement('div');
+  section.className = 'section active';
+  section.innerHTML = `
+    <div class="meta">Frage ${idx+1} von ${QUESTIONS.length}</div>
+    <h2>${q.q}</h2>
+    ${q.o.map((t,i)=>`<div class="option" onclick="selectOpt(this,'${t.replace(/'/g,"&#39;")}')">${t}</div>`).join('')}
+    <div class="actions">
+      <button class="btn back" ${idx===0?'disabled':''} onclick="back()">← Zurück</button>
+      <button class="btn next" onclick="next()">Weiter →</button>
+    </div>
+  `;
+  qwrap.innerHTML = '';
+  qwrap.appendChild(section);
+  qwrap.querySelectorAll('.option').forEach(el=>el.dataset.sel='0');
+  updateProgress();
+}
+
+function updateProgress(){
+  const pct = Math.max(0, (idx+1)/QUESTIONS.length*100);
+  bar.style.width = pct + '%';
+}
+
+function pickTypeFromText(txt){
+  if(txt.includes('(Sanguiniker)')) return 'Sanguiniker';
+  if(txt.includes('(Choleriker)'))   return 'Choleriker';
+  if(txt.includes('(Melancholiker)'))return 'Melancholiker';
+  if(txt.includes('(Phlegmatiker)')) return 'Phlegmatiker';
+  return null;
+}
+
+const history = []; // speichert ausgewählte Option-Texte je Frage
+
+function selectOpt(el, text){
+  qwrap.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+  history[idx] = text;
+}
+
+function applyCount(text, dir){ // dir=+1 oder -1
+  const t = pickTypeFromText(text||'');
+  if(t && counts.hasOwnProperty(t)) counts[t] += dir;
+}
+
+function next(){
+  // wenn bereits eine Frage sichtbar, prüfen ob gewählt
+  if(idx>=0){
+    const chosen = history[idx];
+    if(!chosen){ alert('Bitte eine Option wählen.'); return; }
+  }
+  // Zählung der bisherigen Frage anwenden
+  if(idx>=0) applyCount(history[idx], +1);
+
+  idx++;
+  if(idx < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    finish();
+  }
+}
+
+function back(){
+  if(idx<=0) return;
+  // Auswahl der aktuellen Frage darf nicht gezählt bleiben
+  const curChosen = history[idx];
+  if(curChosen) { /* noch nicht gezählt */ }
+
+  // vorherige Frage rückgängig machen
+  applyCount(history[idx-1], -1);
+  idx--;
+  renderQuestion();
+  // bereits gewählte Option markieren
+  const chosen = history[idx];
+  if(chosen){
+    qwrap.querySelectorAll('.option').forEach(el=>{
+      if(el.textContent.trim()===chosen.trim()) el.classList.add('selected');
+    });
+  }
+}
+
+function finish(){
+  qwrap.innerHTML = '';
+  document.getElementById('result').style.display='block';
+  bar.style.width='100%';
+
+  const reportLines = [
+    "🐾 RESET Hundetyp Auswertung",
+    "",
+    `Choleriker: ${counts.Choleriker}`,
+    `Phlegmatiker: ${counts.Phlegmatiker}`,
+    `Sanguiniker: ${counts.Sanguiniker}`,
+    `Melancholiker: ${counts.Melancholiker}`,
+    "",
+    `Gesamtfragen: ${QUESTIONS.length}`,
+  ];
+  const reportText = reportLines.join("\n");
+  document.getElementById('report').textContent = reportText;
+
+  // Automatisch WhatsApp öffnen (Popup wird i.d.R. erlaubt, da durch Benutzerklick ausgelöst)
+  window._waText = reportText;
+  openWA();
+}
+
+function openWA(){
+  const number = "4915781556678"; // <- deine Nummer ohne +
+  const text = encodeURIComponent(window._waText || document.getElementById('report').textContent || "");
+  const url = `https://wa.me/${number}?text=${text}`;
+  window.open(url, "_blank");
+}
+</script>
+</body>
+</html>
